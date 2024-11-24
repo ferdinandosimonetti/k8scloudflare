@@ -1,0 +1,52 @@
+---
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: cfk8s
+  namespace: balancers
+rules:
+- apiGroups: ["gateway.envoyproxy.io"]
+  resources: ["securitypolicies"]
+  verbs: ["list","get","create","delete","patch","replace"]
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: cfk8s
+  namespace: balancers
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: cfk8s
+  namespace: balancers
+subjects:
+- kind: ServiceAccount
+  name: cfk8s
+  namespace: balancers
+roleRef:
+  kind: Role
+  name: cfk8s
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cfk8s
+  namespace: balancers
+  labels:
+    app: cfk8s
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cfk8s
+  template:
+    metadata:
+      labels:
+        app: cfk8s
+    spec:
+      serviceAccount: cfk8s
+      containers:
+      - name: cfk8s
+        image: rimmon1971/cfk8s:0.1

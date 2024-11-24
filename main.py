@@ -1,6 +1,7 @@
 from kubernetes import client, config, utils
 from kubernetes.client.rest import ApiException
 from pprint import pprint
+import os
 import requests
 
 def getCloudflare():
@@ -25,19 +26,26 @@ def getCloudflare():
     
 
 def main():
-    config.load_kube_config()
+    khost = "KUBERNETES_SERVICE_HOST"
+    if khost in os.environ:
+        config.load_incluster_config()
+    else:
+        config.load_kube_config()
     k8s_client = client.ApiClient()
     api_instance = client.CustomObjectsApi(k8s_client)
+
     group = 'gateway.envoyproxy.io'
-    version = 'v1alpha1'
-    namespace = 'balancers'
     plural = 'securitypolicies'
-    name = 'from-cloudflare'
+    version = 'v1alpha1'
+    apiversion = group + "/" + version
+    namespace = os.environ.get("POLICYNAMESPACE","balancers")
+    name = os.environ.get("POLICYNAME","from-cloudflare")
+    gateway = os.environ.get("GATEWAYNAME","gateway-public")
     pretty = True
     iplist = getCloudflare()
     if iplist:
         data = {
-            "apiVersion": "gateway.envoyproxy.io/v1alpha1",
+            "apiVersion": apiversion,
             "kind": "SecurityPolicy",
             "metadata": {
                 "name": name,
@@ -48,7 +56,7 @@ def main():
                     {
                         "group": "gateway.networking.k8s.io",
                         "kind": "Gateway",
-                        "name": "gateway-public"
+                        "name": gateway
                     }
                 ],
                 "authorization": {
