@@ -65,6 +65,7 @@ spec:
       ttlSecondsAfterFinished: 28800
       template:
         spec:
+          serviceAccount: cfk8s
           containers:
           - name: cfk8s
             env:
