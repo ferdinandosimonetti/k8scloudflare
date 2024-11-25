@@ -75,5 +75,5 @@ spec:
             - name: GATEWAY
               value: gateway-public
             image: rimmon1971/cfk8s:0.2
-            imagePullPolicy: IfNotPresent
+            imagePullPolicy: Always
           restartPolicy: Never
