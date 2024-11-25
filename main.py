@@ -75,14 +75,17 @@ def main():
         try:
             api_response = api_instance.delete_namespaced_custom_object(group, version, namespace, plural, name)
             pprint(api_response)
+            try:
+                api_response = api_instance.create_namespaced_custom_object(group, version, namespace, plural, data, pretty=pretty)
+                pprint(api_response)
+            except ApiException as e:
+                print("Exception when calling CustomObjectsApi->create_namespaced_custom_object: %s\n" % e)
+                exit(3)            
         except ApiException as e:
             print("Exception when calling CustomObjectsApi->delete_namespaced_custom_object: %s\n" % e)
-        try:
-            api_response = api_instance.create_namespaced_custom_object(group, version, namespace, plural, data, pretty=pretty)
-            pprint(api_response)
-        except ApiException as e:
-            print("Exception when calling CustomObjectsApi->create_namespaced_custom_object: %s\n" % e)
-        #utils.create_from_dict(k8s_client,data)
+            exit(2)
+    else:
+        exit(1)
     # example nginx deployment
     #example_dict = {'apiVersion': 'apps/v1', 'kind': 'Deployment', 'metadata': {'name': 'k8s-py-client-nginx', 'namespace': 'default'}, 'spec': {'selector': {'matchLabels': {'app': 'nginx'}}, 'replicas': 1, 'template': {'metadata': {'labels': {'app': 'nginx'}}, 'spec': {'containers': [{'name': 'nginx', 'image': 'nginx:1.14.2', 'ports': [{'containerPort': 80}]}]}}}}
     #utils.create_from_dict(k8s_client, example_dict)

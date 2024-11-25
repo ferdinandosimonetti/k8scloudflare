@@ -49,4 +49,31 @@ spec:
       serviceAccount: cfk8s
       containers:
       - name: cfk8s
-        image: rimmon1971/cfk8s:0.1
+        image: rimmon1971/cfk8s:0.2-sleep
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: cfk8s
+spec:
+  schedule: "@hourly"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 2
+  failedJobsHistoryLimit: 5
+  jobTemplate:
+    spec:
+      ttlSecondsAfterFinished: 28800
+      template:
+        spec:
+          containers:
+          - name: cfk8s
+            env:
+            - name: POLICYNAMESPACE
+              value: balancers
+            - name: POLICYNAME
+              value: from-cloudflare
+            - name: GATEWAY
+              value: gateway-public
+            image: rimmon1971/cfk8s:0.2
+            imagePullPolicy: IfNotPresent
+          restartPolicy: Never
